@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dealer Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      padding-left: 220px;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .submenu {
+      padding-left: 20px;
+    }
+    .card {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="#">Sim Registration</a>
+    <div class="submenu">
+      <a href="newline.html">New Line</a>
+      <a href="active-lines.html">Active Lines</a>
+      <a href="sim-report.html">Report</a>
+    </div>
+    <a href="#">Tills</a>
+    <div class="submenu">
+      <a href="New-till.html">New Till</a>
+      <a href="tills.html">Tills</a>
+      <a href="till-report.html">Report</a>
+    </div>
+    <a href="#">User</a>
+    <div class="submenu">
+      <a href="new-user.html">New User</a>
+      <a href="users.html">Users</a>
+      <a href="user-report.html">Report</a>
+    </div>
+    <a href="delaer.html">Dealer</a>
+  </div>
+
+  <div class="container">
+    <h1 class="mt-4">Dealer Dashboard</h1>
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card text-white bg-primary">
+          <div class="card-body">
+            <h5 class="card-title">Total Tills</h5>
+            <p class="card-text" id="totalTills">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-success">
+          <div class="card-body">
+            <h5 class="card-title">Approved Tills</h5>
+            <p class="card-text" id="approvedTills">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-danger">
+          <div class="card-body">
+            <h5 class="card-title">Inactive Tills</h5>
+            <p class="card-text" id="inactiveTills">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-warning">
+          <div class="card-body">
+            <h5 class="card-title">Top Dealer</h5>
+            <p class="card-text" id="topDealer">None</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="mt-5">Dealer Report</h2>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Total Tills</th>
+          <th>Approved</th>
+          <th>Inactive</th>
+          <th>Transactions</th>
+          <th>Last Transaction Date</th>
+          <th>Export</th>
+        </tr>
+      </thead>
+      <tbody id="dealerTableBody">
+        <!-- Rows will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyaizPUoDrBMpTtUEvUE4YX2QHavNIy5ai5qgdyaXekoJ9OWMTLYWwHyX98kFpiiJ8J/exec");
+      const dealers = await res.json();
+
+      let totalTills = 0, approved = 0, inactive = 0;
+      let topDealer = {name: "", tx: 0};
+
+      dealers.forEach(d => {
+        totalTills += d.total;
+        approved += d.approved;
+        inactive += d.inactive;
+        if (d.tx > topDealer.tx) topDealer = {name: d.name, tx: d.tx};
+
+        document.getElementById("dealerTableBody").innerHTML += `
+          <tr>
+            <td>${d.name}</td>
+            <td>${d.total}</td>
+            <td>${d.approved}</td>
+            <td>${d.inactive}</td>
+            <td>${d.tx}</td>
+            <td>${d.lastDate}</td>
+            <td><button class="btn btn-sm btn-secondary" onclick="exportDealerCSV('${d.name}')">Export CSV</button></td>
+          </tr>`;
+      });
+
+      document.getElementById("totalTills").textContent = totalTills;
+      document.getElementById("approvedTills").textContent = approved;
+      document.getElementById("inactiveTills").textContent = inactive;
+      document.getElementById("topDealer").textContent = topDealer.name;
+    });
+
+    function exportDealerCSV(dealerName) {
+      // Replace with logic to export dealer-specific data
+      alert("Exporting CSV for " + dealerName);
+    }
+  </script>
+</body>
+</html>
