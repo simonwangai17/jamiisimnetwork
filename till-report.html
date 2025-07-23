@@ -45,7 +45,6 @@
       margin-bottom: 20px;
     }
 
-    /* ===== Card Section ===== */
     .card-container {
       display: flex;
       flex-wrap: wrap;
@@ -85,7 +84,6 @@
       font-size: 14px;
     }
 
-    /* ===== Filter Section ===== */
     .filter-section {
       display: flex;
       flex-wrap: wrap;
@@ -201,15 +199,15 @@
     <!-- Cards -->
     <div class="card-container">
       <div class="card card-blue">
-        <h3>3</h3>
+        <h3>0</h3>
         <p>Total Tills</p>
       </div>
       <div class="card card-green">
-        <h3>2</h3>
+        <h3>0</h3>
         <p>Approved Tills</p>
       </div>
       <div class="card card-yellow">
-        <h3>1</h3>
+        <h3>0</h3>
         <p>Pending Tills</p>
       </div>
     </div>
@@ -243,27 +241,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>123456</td>
-          <td>Store001</td>
-          <td>GS001</td>
-          <td>Approved</td>
-          <td>2025-07-15</td>
-        </tr>
-        <tr>
-          <td>654321</td>
-          <td>Store002</td>
-          <td>MT002</td>
-          <td>Pending</td>
-          <td>2025-07-17</td>
-        </tr>
-        <tr>
-          <td>789456</td>
-          <td>Store003</td>
-          <td>GS003</td>
-          <td>Approved</td>
-          <td>2025-07-16</td>
-        </tr>
+        <!-- Live data will be inserted here -->
       </tbody>
     </table>
 
@@ -272,27 +250,78 @@
     </div>
   </div>
 
-  <!-- Filtering Logic -->
-  <script>
-    function filterReport() {
-      const startDate = new Date(document.getElementById("startDate").value);
-      const endDate = new Date(document.getElementById("endDate").value);
-      const rows = document.querySelectorAll("#reportTable tbody tr");
-      let hasResults = false;
+  <!-- Load data and filter -->
+<!-- Replace the entire <script> section with this updated version -->
+<script>
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgVxEXIWwUCcGedeb_vWHwkYVCoDGScjMVCMW0c24EtMWOKjCJcBK6Yl-nrRHHj6Eum-ZF8wjC_b0a/pub?gid=616196508&single=true&output=csv";
 
-      rows.forEach(row => {
-        const createdAt = new Date(row.cells[4].textContent.trim());
-        if (startDate && endDate && createdAt >= startDate && createdAt <= endDate) {
-          row.style.display = "";
-          hasResults = true;
-        } else {
-          row.style.display = "none";
+  function loadTillReport() {
+    fetch(CSV_URL)
+      .then(response => response.text())
+      .then(csv => {
+        const lines = csv.trim().split("\n");
+        const tbody = document.querySelector("#reportTable tbody");
+        tbody.innerHTML = "";
+
+        let approvedCount = 0;
+        let pendingCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const data = lines[i].split(",");
+
+          const tillNumber = data[0];
+          const storeNumber = data[1];
+          const operatorID = data[2];
+          const status = data[3].trim().toLowerCase();
+          const createdAt = data[4];
+
+          if (status === "active") approvedCount++;
+          if (status === "pending") pendingCount++;
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${tillNumber}</td>
+            <td>${storeNumber}</td>
+            <td>${operatorID}</td>
+            <td>${data[3]}</td>
+            <td>${createdAt}</td>
+          `;
+          tbody.appendChild(row);
         }
-      });
 
-      document.getElementById("noResults").style.display = hasResults ? "none" : "block";
-    }
-  </script>
+        // Update card values
+        document.querySelector(".card-blue h3").textContent = lines.length - 1;
+        document.querySelector(".card-green h3").textContent = approvedCount;
+        document.querySelector(".card-yellow h3").textContent = pendingCount;
+      })
+      .catch(error => {
+        console.error("Error loading sheet:", error);
+        alert("Could not load Till Report from Google Sheets.");
+      });
+  }
+
+  function filterReport() {
+    const startDate = new Date(document.getElementById("startDate").value);
+    const endDate = new Date(document.getElementById("endDate").value);
+    const rows = document.querySelectorAll("#reportTable tbody tr");
+    let hasResults = false;
+
+    rows.forEach(row => {
+      const createdAt = new Date(row.cells[4].textContent.trim());
+      if (!isNaN(startDate) && !isNaN(endDate) && createdAt >= startDate && createdAt <= endDate) {
+        row.style.display = "";
+        hasResults = true;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    document.getElementById("noResults").style.display = hasResults ? "none" : "block";
+  }
+
+  window.onload = loadTillReport;
+</script>
+
 
 </body>
 </html>
