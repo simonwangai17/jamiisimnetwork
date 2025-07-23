@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New User</title>
+  <style>
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .submenu {
+      padding-left: 20px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    .main-content {
+      margin-left: 240px;
+      padding: 40px;
+    }
+
+    .form-card {
+      background-color: white;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+    }
+
+    .form-card h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #343a40;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+    .submit-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      border: none;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    @media screen and (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .form-card {
+        margin: 30px auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar HTML -->
+  <div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="#">Sim Registration</a>
+    <div class="submenu">
+      <a href="newline.html">New Line</a>
+      <a href="active-lines.html">Active Lines</a>
+      <a href="sim-report.html">Report</a>
+    </div>
+    <a href="#">Tills</a>
+    <div class="submenu">
+      <a href="New-till.html">New Till</a>
+      <a href="tills.html">Tills</a>
+      <a href="till-report.html">Report</a>
+    </div>
+    <a href="#">User</a>
+    <div class="submenu">
+      <a href="new-user.html">New User</a>
+      <a href="users.html">Users</a>
+      <a href="user-report.html">Report</a>
+    </div>
+    <a href="delaer.html">Dealer</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="form-card">
+      <h2>Register New User</h2>
+      <form id="userForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Enter full name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="idNumber">ID Number</label>
+          <input type="text" id="idNumber" placeholder="Enter ID number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="text" id="phoneNumber" placeholder="Enter phone number" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("userForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const idNumber = document.getElementById("idNumber").value.trim();
+      const phoneNumber = document.getElementById("phoneNumber").value.trim();
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbw1IV9JVo9NrKq87dG3MrOAoYz7-EjdGjlnRangFH7n8VeoVIiTviUfSNueMtIfAQWn/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            idNumber,
+            phoneNumber,
+            status: "Active"
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          alert("User successfully registered!");
+          document.getElementById("userForm").reset();
+        } else {
+          alert("Failed to submit. " + result.message);
+        }
+      } catch (err) {
+        console.error("Error submitting form:", err);
+        alert("Failed to submit. Please check console for details.");
+      }
+    });
+  </script>
+
+</body>
+</html>

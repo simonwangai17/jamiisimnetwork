@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIM Report</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin-left: 220px;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .summary-cards .card {
+      margin-bottom: 20px;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+      z-index: 1000;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .submenu {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar HTML -->
+<div class="sidebar">
+  <a href="index.html">Home</a>
+  <a href="#">Sim Registration</a>
+  <div class="submenu">
+    <a href="newline.html">New Line</a>
+    <a href="active-lines.html">Active Lines</a>
+    <a href="sim-report.html">Report</a>
+  </div>
+  <a href="#">Tills</a>
+  <div class="submenu">
+    <a href="New-till.html">New Till</a>
+    <a href="tills.html">Tills</a>
+    <a href="till-report.html">Report</a>
+  </div>
+  <a href="#">User</a>
+  <div class="submenu">
+    <a href="new-user.html">New User</a>
+    <a href="users.html">Users</a>
+    <a href="user-report.html">Report</a>
+  </div>
+  <a href="delaer.html">Dealer</a>
+</div>
+
+<!-- Main Content -->
+<div class="container-fluid">
+  <h2 class="mb-4">SIM Registration Report</h2>
+
+  <div class="row summary-cards">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <h5 class="card-title">Total SIMs</h5>
+          <p class="card-text" id="totalSims">Loading...</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <h5 class="card-title">M-Pesa Active</h5>
+          <p class="card-text" id="mpesaActive">Loading...</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <h5 class="card-title">Pending M-Pesa</h5>
+          <p class="card-text" id="mpesaPending">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive mt-4">
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Phone Number</th>
+          <th>Name</th>
+          <th>ID Number</th>
+          <th>DOB</th>
+          <th>M-Pesa Active</th>
+          <th>Registration Date</th>
+        </tr>
+      </thead>
+      <tbody id="simReportTable">
+        <!-- Data will be injected here -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Replace with your actual Google Sheets API config
+  const SHEET_ID = 'YOUR_SHEET_ID';
+  const API_KEY = 'YOUR_API_KEY';
+  const RANGE = 'Sim_Registrations'; // Change if needed
+  const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+
+  async function loadSimReport() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const rows = data.values;
+      const headers = rows[0];
+      const body = document.getElementById('simReportTable');
+
+      let total = 0;
+      let active = 0;
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const mpesaStatus = row[headers.indexOf("M-Pesa Active")];
+        const name = row[headers.indexOf("Name")];
+        const id = row[headers.indexOf("ID Number")];
+        const phone = row[headers.indexOf("Phone Number")];
+        const dob = row[headers.indexOf("Date of Birth")];
+        const regDate = row[headers.indexOf("Registration Date")];
+
+        if (phone) {
+          total++;
+          if (mpesaStatus === 'Yes') active++;
+
+          body.innerHTML += `
+            <tr>
+              <td>${i}</td>
+              <td>${phone}</td>
+              <td>${name}</td>
+              <td>${id}</td>
+              <td>${dob}</td>
+              <td>${mpesaStatus}</td>
+              <td>${regDate}</td>
+            </tr>
+          `;
+        }
+      }
+
+      document.getElementById('totalSims').textContent = total;
+      document.getElementById('mpesaActive').textContent = active;
+      document.getElementById('mpesaPending').textContent = total - active;
+    } catch (error) {
+      console.error("Failed to load SIM report:", error);
+    }
+  }
+
+  loadSimReport();
+</script>
+
+</body>
+</html>

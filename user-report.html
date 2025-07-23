@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Report</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      padding-left: 220px;
+    }
+
+    .main {
+      padding: 20px;
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      flex: 1;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card:nth-child(1) {
+      background-color: #17a2b8;
+    }
+
+    .card:nth-child(2) {
+      background-color: #28a745;
+    }
+
+    .card:nth-child(3) {
+      background-color: #dc3545;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .card p {
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .search-bar {
+      margin-bottom: 20px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-bar label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .search-bar input[type="date"],
+    .search-bar input[type="text"] {
+      padding: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .search-bar button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+
+    .submenu {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar HTML -->
+<div class="sidebar">
+  <a href="index.html">Home</a>
+  <a href="#">Sim Registration</a>
+  <div class="submenu">
+    <a href="newline.html">New Line</a>
+    <a href="active-lines.html">Active Lines</a>
+    <a href="sim-report.html">Report</a>
+  </div>
+  <a href="#">Tills</a>
+  <div class="submenu">
+    <a href="New-till.html">New Till</a>
+    <a href="tills.html">Tills</a>
+    <a href="till-report.html">Report</a>
+  </div>
+  <a href="#">User</a>
+  <div class="submenu">
+    <a href="new-user.html">New User</a>
+    <a href="users.html">Users</a>
+    <a href="user-report.html">Report</a>
+  </div>
+  <a href="delaer.html">Dealer</a>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+  <h1>User Report</h1>
+
+  <!-- Colorful Cards -->
+  <div class="cards">
+    <div class="card">
+      <h2>145</h2>
+      <p>Total Users</p>
+    </div>
+    <div class="card">
+      <h2>122</h2>
+      <p>Active Users</p>
+    </div>
+    <div class="card">
+      <h2>23</h2>
+      <p>Inactive Users</p>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <div style="flex-grow: 1;">
+      <label for="fromDate">From:</label>
+      <input type="date" id="fromDate" />
+      <label for="toDate">To:</label>
+      <input type="date" id="toDate" />
+      <label for="searchName">Search:</label>
+      <input type="text" id="searchName" placeholder="Enter name or ID..." />
+    </div>
+    <button onclick="filterUsers()">Search</button>
+  </div>
+
+  <!-- Users Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>ID Number</th>
+        <th>Phone</th>
+        <th>Registration Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="userTable">
+      <tr>
+        <td>John Doe</td>
+        <td>12345678</td>
+        <td>0712345678</td>
+        <td>2025-07-15</td>
+        <td>Active</td>
+      </tr>
+      <tr>
+        <td>Jane Wanjiku</td>
+        <td>87654321</td>
+        <td>0798765432</td>
+        <td>2025-07-12</td>
+        <td>Inactive</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- JavaScript -->
+<script>
+  const sheetAPI = 'https://script.google.com/macros/s/AKfycbxiBGtEbIw_iAV3AAPw2hTLvxKm-6QKeRi7JEzs7qGMk4s_Id_Sp3xkaKC43-KPjK87/exec';
+
+  async function fetchUsers() {
+    try {
+      const response = await fetch(sheetAPI);
+      const data = await response.json();
+
+      const tableBody = document.getElementById("userTable");
+      tableBody.innerHTML = "";
+
+      let total = 0;
+      let active = 0;
+      let inactive = 0;
+
+      data.forEach(user => {
+        total++;
+
+        const status = (user["Status"] || "").toLowerCase();
+        if (status === "active") active++;
+        if (status === "inactive") inactive++;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${user["Name"] || ""}</td>
+          <td>${user["ID Number"] || ""}</td>
+          <td>${user["Phone Number"] || ""}</td>
+          <td>${user["Registration Date"] || ""}</td>
+          <td>${user["Status"] || ""}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      updateCardStats(total, active, inactive);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      alert("Failed to load user data.");
+    }
+  }
+
+  function updateCardStats(total, active, inactive) {
+    const cardEls = document.querySelectorAll(".card h2");
+    if (cardEls.length >= 3) {
+      cardEls[0].textContent = total;
+      cardEls[1].textContent = active;
+      cardEls[2].textContent = inactive;
+    }
+  }
+
+  function filterUsers() {
+    const name = document.getElementById("searchName").value.toLowerCase();
+    const rows = document.querySelectorAll("#userTable tr");
+
+    rows.forEach(row => {
+      const rowText = row.innerText.toLowerCase();
+      row.style.display = rowText.includes(name) ? "" : "none";
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", fetchUsers);
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Till Registration</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    /* ✅ Leave sidebar styles untouched */
+    body {
+      font-family: Arial, sans-serif;
+      margin-left: 240px;
+      background-color: #f1f1f1;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .submenu {
+      padding-left: 20px;
+    }
+
+    /* ✅ Refreshed main form styles */
+    .form-container {
+      padding: 40px 30px;
+      max-width: 700px;
+      margin: 50px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-step {
+      display: none;
+    }
+    .form-step.active {
+      display: block;
+    }
+    label {
+      display: block;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 150px;
+      margin-top: 10px;
+    }
+    #map {
+      height: 300px;
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 5px;
+    }
+
+    @media screen and (max-width: 768px) {
+      body {
+        margin-left: 0;
+      }
+      .form-container {
+        margin: 20px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar HTML -->
+<div class="sidebar">
+  <a href="index.html">Home</a>
+  <a href="#">Sim Registration</a>
+  <div class="submenu">
+    <a href="newline.html">New Line</a>
+    <a href="active-lines.html">Active Lines</a>
+    <a href="sim-report.html">Report</a>
+  </div>
+  <a href="#">Tills</a>
+  <div class="submenu">
+    <a href="New-till.html">New Till</a>
+    <a href="tills.html">Tills</a>
+    <a href="till-report.html">Report</a>
+  </div>
+  <a href="#">User</a>
+  <div class="submenu">
+    <a href="new-user.html">New User</a>
+    <a href="users.html">Users</a>
+    <a href="user-report.html">Report</a>
+  </div>
+  <a href="delaer.html">Dealer</a>
+</div>
+
+<!-- Form -->
+<div class="form-container">
+  <h2>Register New Till</h2>
+
+  <div class="form-step active" id="step1">
+    <label>Phone Number:
+      <input type="text" id="phone" />
+    </label>
+    <label>Name:
+      <input type="text" id="name" readonly />
+    </label>
+    <label>ID Number:
+      <input type="text" id="id" readonly />
+    </label>
+    <label>Operator ID:
+      <input type="text" id="opid" readonly />
+    </label>
+    <button onclick="nextStep(2)">Next</button>
+  </div>
+
+  <div class="form-step" id="step2">
+    <label>Till Number:
+      <input type="text" id="till" />
+    </label>
+    <label>Store Number:
+      <input type="text" id="store" />
+    </label>
+    <label>PIN:
+      <input type="password" id="pin" />
+    </label>
+    <label>Serial Number:
+      <input type="text" id="serial" />
+    </label>
+    <label>Dealer:
+      <select id="dealer">
+        <option value="Enight">Enight</option>
+        <option value="Mayaash">Mayaash</option>
+      </select>
+    </label>
+    <label>Enter OTP:
+      <input type="text" id="otp" />
+    </label>
+    <button onclick="nextStep(3)">Next</button>
+  </div>
+
+  <div class="form-step" id="step3">
+    <label>Signature:</label>
+    <canvas id="signature" width="500" height="150"></canvas>
+    <button onclick="clearSig()">Clear Signature</button>
+    <label>Geolocation:</label>
+    <div id="map"></div>
+    <button onclick="submitForm()">Submit</button>
+  </div>
+
+  <div class="loader" id="loader">Loading...</div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  let currentStep = 1;
+  const nameInput = document.getElementById('name');
+  const idInput = document.getElementById('id');
+  const opidInput = document.getElementById('opid');
+
+  function nextStep(step) {
+    document.getElementById('loader').style.display = 'block';
+    setTimeout(() => {
+      document.querySelector(`#step${currentStep}`).classList.remove('active');
+      currentStep = step;
+      document.querySelector(`#step${currentStep}`).classList.add('active');
+      document.getElementById('loader').style.display = 'none';
+      if (step === 3) initMap();
+    }, 1500);
+  }
+
+  // Autofill simulation
+  document.getElementById('phone').addEventListener('blur', () => {
+    const phone = document.getElementById('phone').value;
+    nameInput.value = "John Doe";
+    idInput.value = "12345678";
+    opidInput.value = "JD";
+  });
+
+  // Signature
+  const canvas = document.getElementById("signature");
+  const ctx = canvas.getContext("2d");
+  let isDrawing = false;
+  canvas.addEventListener("mousedown", () => isDrawing = true);
+  canvas.addEventListener("mouseup", () => {
+    isDrawing = false;
+    ctx.beginPath();
+  });
+  canvas.addEventListener("mousemove", draw);
+  function draw(e) {
+    if (!isDrawing) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+  }
+  function clearSig() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Geolocation Map
+  let map;
+  let userMarker;
+  function initMap() {
+    map = L.map('map').setView([-1.2921, 36.8219], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+    map.locate({setView: true, maxZoom: 16});
+    map.on('locationfound', (e) => {
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
+    });
+  }
+
+  function submitForm() {
+    alert("Form Submitted! (Hook up to Google Sheets API or Apps Script)");
+  }
+</script>
+
+</body>
+</html>

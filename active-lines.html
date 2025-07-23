@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Active Lines</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      margin-left: 220px;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+
+    .submenu {
+      padding-left: 20px;
+    }
+
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .status-active {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .status-inactive {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="#">Sim Registration</a>
+    <div class="submenu">
+      <a href="newline.html">New Line</a>
+      <a href="active-lines.html">Active Lines</a>
+      <a href="sim-report.html">Report</a>
+    </div>
+    <a href="#">Tills</a>
+    <div class="submenu">
+      <a href="New-till.html">New Till</a>
+      <a href="tills.html">Tills</a>
+      <a href="till-report.html">Report</a>
+    </div>
+    <a href="#">User</a>
+    <div class="submenu">
+      <a href="new-user.html">New User</a>
+      <a href="users.html">Users</a>
+      <a href="user-report.html">Report</a>
+    </div>
+    <a href="delaer.html">Dealer</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container-fluid">
+    <h2 class="mb-4">Active Lines</h2>
+
+    <!-- Cards -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-white bg-primary">
+          <div class="card-body">
+            <h5 class="card-title">Connected Lines</h5>
+            <p class="card-text fs-4" id="connectedLines">25</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-success">
+          <div class="card-body">
+            <h5 class="card-title">M-Pesa Activations</h5>
+            <p class="card-text fs-4" id="mpesaActivations">10</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-warning">
+          <div class="card-body">
+            <h5 class="card-title">Re-Registrations Available</h5>
+            <p class="card-text fs-4" id="reRegistrations">5</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Phone Number</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="linesTableBody">
+          <!-- Dynamic Data Fills Here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<!-- ... (head and sidebar remain unchanged) -->
+
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbyXqIajDBfjyIdX9XcopH5Q8a7HOsU6q11zioSVvAi5gGz6ggBHxieCsRnsJdwzJf1h/exec";
+
+  async function loadLines() {
+    try {
+      const res = await fetch(scriptURL);
+      const data = await res.json();
+
+      const tableBody = document.getElementById("linesTableBody");
+      tableBody.innerHTML = "";
+
+      let connectedCount = 0;
+      let mpesaCount = 0;
+      let reRegCount = 0;
+
+      data.forEach((row, index) => {
+        const phone = (row["Phone Number"] || "").trim();
+        const mpesaDate = (row["Registration Date"] || "").trim();
+        const regStatus = (row["Status"] || "").trim().toLowerCase();
+
+        // ✅ Count connected lines if phone is present and valid
+        if (phone && /^\d{10,}$/.test(phone)) {
+          connectedCount++;
+        }
+
+        // ✅ Count M-Pesa Activations if Registration Date (F) is not empty
+        if (mpesaDate) {
+          mpesaCount++;
+        }
+
+        // ✅ Count Re-Registrations if Status (H) is 'available'
+        if (regStatus === "available") {
+          reRegCount++;
+        }
+
+        const isMpesaActive = !!mpesaDate;
+        const statusClass = isMpesaActive ? "status-active" : "status-inactive";
+        const statusText = isMpesaActive ? "Active" : "Not Active";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${phone || '-'}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td>
+            <button class="btn btn-sm ${isMpesaActive ? 'btn-secondary' : 'btn-outline-success'}"
+              ${isMpesaActive ? 'disabled' : ''}
+              onclick="activateMpesa(this, '${phone}')">
+              ${isMpesaActive ? "Already Active" : "Activate M-Pesa"}
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      document.getElementById("connectedLines").textContent = connectedCount;
+      document.getElementById("mpesaActivations").textContent = mpesaCount;
+      document.getElementById("reRegistrations").textContent = reRegCount;
+
+    } catch (err) {
+      console.error("Error loading data:", err);
+    }
+  }
+
+  async function activateMpesa(button, phoneNumber) {
+    try {
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber })
+      });
+      const result = await res.json();
+
+      if (result.status === "success") {
+        loadLines();
+      } else {
+        alert("Failed to activate: " + result.message);
+      }
+    } catch (err) {
+      console.error("Activation failed:", err);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadLines);
+</script>
+
+
+</body>
+</html>

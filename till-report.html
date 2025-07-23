@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Till Report</title>
+
+  <style>
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      background-color: #343a40;
+      padding-top: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .submenu {
+      padding-left: 20px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    .main-content {
+      margin-left: 240px;
+      padding: 20px;
+    }
+
+    .header {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    /* ===== Card Section ===== */
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      flex: 1;
+      min-width: 200px;
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .card-blue {
+      background-color: #007bff;
+    }
+
+    .card-green {
+      background-color: #28a745;
+    }
+
+    .card-yellow {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .card p {
+      margin: 5px 0 0;
+      font-size: 14px;
+    }
+
+    /* ===== Filter Section ===== */
+    .filter-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .filter-section label {
+      font-weight: 500;
+    }
+
+    .filter-section input[type="date"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      flex-grow: 1;
+      min-width: 180px;
+    }
+
+    .filter-section button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .filter-section button:hover {
+      background-color: #0056b3;
+    }
+
+    .quick-access {
+      margin-bottom: 20px;
+    }
+
+    .quick-access button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .quick-access button:hover {
+      background-color: #218838;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .no-results {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="#">Sim Registration</a>
+    <div class="submenu">
+      <a href="newline.html">New Line</a>
+      <a href="active-lines.html">Active Lines</a>
+      <a href="sim-report.html">Report</a>
+    </div>
+    <a href="#">Tills</a>
+    <div class="submenu">
+      <a href="New-till.html">New Till</a>
+      <a href="tills.html">Tills</a>
+      <a href="till-report.html">Report</a>
+    </div>
+    <a href="#">User</a>
+    <div class="submenu">
+      <a href="new-user.html">New User</a>
+      <a href="users.html">Users</a>
+      <a href="user-report.html">Report</a>
+    </div>
+    <a href="dealer.html">Dealer</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">Till Report</div>
+
+    <!-- Cards -->
+    <div class="card-container">
+      <div class="card card-blue">
+        <h3>3</h3>
+        <p>Total Tills</p>
+      </div>
+      <div class="card card-green">
+        <h3>2</h3>
+        <p>Approved Tills</p>
+      </div>
+      <div class="card card-yellow">
+        <h3>1</h3>
+        <p>Pending Tills</p>
+      </div>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="filter-section">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate">
+
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate">
+
+      <button onclick="filterReport()">Search</button>
+    </div>
+
+    <!-- Quick Access Buttons -->
+    <div class="quick-access">
+      <button onclick="location.href='newtill.html'">+ Add New Till</button>
+      <button onclick="location.href='tills.html'">View All Tills</button>
+    </div>
+
+    <!-- Report Table -->
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>Till Number</th>
+          <th>Store Number</th>
+          <th>Operator ID</th>
+          <th>Status</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>123456</td>
+          <td>Store001</td>
+          <td>GS001</td>
+          <td>Approved</td>
+          <td>2025-07-15</td>
+        </tr>
+        <tr>
+          <td>654321</td>
+          <td>Store002</td>
+          <td>MT002</td>
+          <td>Pending</td>
+          <td>2025-07-17</td>
+        </tr>
+        <tr>
+          <td>789456</td>
+          <td>Store003</td>
+          <td>GS003</td>
+          <td>Approved</td>
+          <td>2025-07-16</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="no-results" id="noResults" style="display: none;">
+      No results found for selected date range.
+    </div>
+  </div>
+
+  <!-- Filtering Logic -->
+  <script>
+    function filterReport() {
+      const startDate = new Date(document.getElementById("startDate").value);
+      const endDate = new Date(document.getElementById("endDate").value);
+      const rows = document.querySelectorAll("#reportTable tbody tr");
+      let hasResults = false;
+
+      rows.forEach(row => {
+        const createdAt = new Date(row.cells[4].textContent.trim());
+        if (startDate && endDate && createdAt >= startDate && createdAt <= endDate) {
+          row.style.display = "";
+          hasResults = true;
+        } else {
+          row.style.display = "none";
+        }
+      });
+
+      document.getElementById("noResults").style.display = hasResults ? "none" : "block";
+    }
+  </script>
+
+</body>
+</html>
