@@ -162,13 +162,13 @@
     <!-- Cards -->
     <div class="cards">
       <div class="card">
-        <h2>All Tills: 58</h2>
+        <h2>All Tills: 0</h2>
       </div>
       <div class="card">
-        <h2>Re-applications: 7</h2>
+        <h2>Re-applications: 0</h2>
       </div>
       <div class="card">
-        <h2>Pending Tills: 12</h2>
+        <h2>Pending Tills: 0</h2>
       </div>
     </div>
 
@@ -188,51 +188,105 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="tillTable">
-          <tr>
-            <td>123456</td>
-            <td>Store-01</td>
-            <td id="status-1">Pending</td>
-            <td><button onclick="approveTill(1)">Approve</button></td>
-          </tr>
-          <tr>
-            <td>789012</td>
-            <td>Store-02</td>
-            <td id="status-2">Pending</td>
-            <td><button onclick="approveTill(2)">Approve</button></td>
-          </tr>
+        <tbody id="Tills">
+          <!-- Data loaded from CSV -->
         </tbody>
       </table>
     </div>
   </div>
 
-  <script>
-    function approveTill(id) {
-      const statusCell = document.getElementById(`status-${id}`);
-      statusCell.textContent = 'Approved';
-      alert('Till approved successfully!');
-    }
+ <script>
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgVxEXIWwUCcGedeb_vWHwkYVCoDGScjMVCMW0c24EtMWOKjCJcBK6Yl-nrRHHj6Eum-ZF8wjC_b0a/pub?gid=1691483315&single=true&output=csv";
 
-    function filterTable() {
-      const input = document.getElementById("searchInput");
-      const filter = input.value.toUpperCase();
-      const table = document.getElementById("tillTable");
-      const tr = table.getElementsByTagName("tr");
+  function loadTillsData() {
+    fetch(CSV_URL)
+      .then(response => response.text())
+      .then(csv => {
+        const lines = csv.trim().split("\n");
+        const headers = lines[0].split(",");
+        const rows = lines.slice(1).map(line => line.split(","));
 
-      for (let i = 0; i < tr.length; i++) {
-        const td1 = tr[i].getElementsByTagName("td")[0];
-        const td2 = tr[i].getElementsByTagName("td")[1];
-        if (td1 || td2) {
-          const txtValue1 = td1.textContent || td1.innerText;
-          const txtValue2 = td2.textContent || td2.innerText;
-          if (txtValue1.toUpperCase().indexOf(filter) > -1 || txtValue2.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
+        const now = new Date();
+        let allTills = 0;
+        let reApplications = 0;
+        let pendingTills = 0;
+
+        const tbody = document.getElementById("Tills");
+        tbody.innerHTML = "";
+
+        rows.forEach((cols, index) => {
+          const tillNumber = cols[1]?.trim();      // Column B
+          const storeNumber = cols[2]?.trim();     // Column C
+          const status = cols[11]?.trim().toLowerCase();  // Column L
+          const lastUpdated = cols[12]?.trim();    // Column M
+
+          if (!tillNumber) return;
+
+          allTills++;
+
+          // Re-application check (more than 2 days from today)
+          if (lastUpdated) {
+            const dateDiff = (now - new Date(lastUpdated)) / (1000 * 60 * 60 * 24);
+            if (!isNaN(dateDiff) && dateDiff > 2) {
+              reApplications++;
+            }
           }
+
+          if (status === "pending") pendingTills++;
+
+          const tr = document.createElement("tr");
+          const rowId = `row-${index + 1}`;
+          const btn = status === "pending" ? `<button onclick="approveTill('${rowId}')">Approve</button>` : "";
+
+          tr.innerHTML = `
+            <td>${tillNumber}</td>
+            <td>${storeNumber}</td>
+            <td id="status-${rowId}">${status.charAt(0).toUpperCase() + status.slice(1)}</td>
+            <td>${btn}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Update cards
+        document.querySelector(".card:nth-child(1) h2").textContent = `All Tills: ${allTills}`;
+        document.querySelector(".card:nth-child(2) h2").textContent = `Re-applications: ${reApplications}`;
+        document.querySelector(".card:nth-child(3) h2").textContent = `Pending Tills: ${pendingTills}`;
+      })
+      .catch(error => {
+        console.error("Error fetching Tills CSV:", error);
+        alert("Failed to load Tills data.");
+      });
+  }
+
+  function approveTill(rowId) {
+    const statusCell = document.getElementById(`status-${rowId}`);
+    statusCell.textContent = "Approved";
+    alert("Till approved successfully!");
+  }
+
+  function filterTable() {
+    const input = document.getElementById("searchInput");
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById("tillTable");
+    const tr = table.getElementsByTagName("tr");
+
+    for (let i = 0; i < tr.length; i++) {
+      const td1 = tr[i].getElementsByTagName("td")[0];
+      const td2 = tr[i].getElementsByTagName("td")[1];
+      if (td1 || td2) {
+        const txtValue1 = td1.textContent || td1.innerText;
+        const txtValue2 = td2.textContent || td2.innerText;
+        if (txtValue1.toUpperCase().indexOf(filter) > -1 || txtValue2.toUpperCase().indexOf(filter) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
         }
       }
     }
-  </script>
+  }
+
+  window.onload = loadTillsData;
+</script>
+
 </body>
 </html>
